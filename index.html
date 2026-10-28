@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>the ketchen</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0d0b09;
+      }
+      #loader {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: grid;
+        place-items: center;
+        background: #0d0b09;
+        transition:
+          opacity 0.6s ease 0.1s,
+          visibility 0s linear 0.7s;
+      }
+      #loader.done {
+        opacity: 0;
+        visibility: hidden;
+      }
+      #loader .bar {
+        width: 96px;
+        height: 1px;
+        background: rgba(246, 238, 221, 0.1);
+      }
+      #loader .fill {
+        height: 100%;
+        background: rgba(246, 238, 221, 0.7);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="title">
+    <div id="app"></div>
+    <div id="loader">
+      <div class="bar"><div class="fill"></div></div>
+    </div>
+    <div id="title">
+      <span class="corner top left">world labs</span>
+      <span class="enter"><span class="mouse">click</span><span class="tap">tap</span> to enter</span>
+    </div>
+    <div id="vignette"></div>
+    <div id="crosshair"><span>click to walk</span></div>
+    <div id="keys">
+      <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>move</span></div>
+      <div><kbd class="wide">shift</kbd><span>run</span></div>
+      <div><kbd class="wide">space</kbd><span>jump</span></div>
+      <div><kbd>C</kbd><span>crouch</span></div>
+      <div><kbd class="wide">click</kbd><span>zoom</span></div>
+    </div>
+    <div id="stick"><div id="knob"></div></div>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>

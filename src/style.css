@@ -1,0 +1,313 @@
+@font-face {
+    font-family: "Paper Mono";
+    font-weight: 400;
+    src: url("../assets/fonts/PaperMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Paper Mono";
+    font-weight: 500;
+    src: url("../assets/fonts/PaperMono-Medium.woff2") format("woff2");
+}
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #0d0b09;
+    color: #f3ead8;
+    font:
+        12px / 1.4 system-ui,
+        sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+canvas {
+    touch-action: none;
+}
+
+@keyframes breathe {
+    50% {
+        opacity: 0.55;
+    }
+}
+
+#vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(8, 6, 4, 0.55) 100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+#crosshair {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    margin: -4px 0 0 -4px;
+    border: 1px solid rgba(255, 250, 240, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+#crosshair span {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 14px;
+    opacity: 0.9;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    transition: opacity 0.2s ease;
+}
+
+.active #crosshair span,
+.touch #crosshair span {
+    opacity: 0;
+}
+
+/* keyboard */
+
+#keys {
+    position: fixed;
+    left: max(20px, env(safe-area-inset-left));
+    bottom: max(18px, env(safe-area-inset-bottom));
+    display: grid;
+    gap: 6px;
+    opacity: 0.85;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+#keys > div {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+#keys kbd {
+    display: inline-grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 250, 240, 0.28);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    background: rgba(255, 250, 240, 0.08);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font:
+        600 10px / 1 system-ui,
+        sans-serif;
+    letter-spacing: 0.02em;
+    color: rgba(255, 250, 240, 0.92);
+}
+
+#keys kbd.wide {
+    min-width: 44px;
+}
+
+#keys span {
+    margin-left: 6px;
+    opacity: 0.65;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.active #keys {
+    opacity: 0.35;
+}
+
+.touch #keys {
+    display: none;
+}
+
+/* touch */
+
+#stick {
+    display: none;
+}
+
+.touch #stick {
+    display: block;
+}
+
+#stick {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 96px;
+    height: 96px;
+    margin: -48px 0 0 -48px;
+    border: 1px solid rgba(255, 250, 240, 0.35);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+#stick.held {
+    opacity: 1;
+}
+
+/* Resting bottom-left as a hint until first used; after that it only appears under the thumb. */
+#stick:not(.used) {
+    opacity: 0.5;
+    transform: translate(
+        max(84px, calc(env(safe-area-inset-left) + 72px)),
+        calc(100dvh - max(110px, calc(env(safe-area-inset-bottom) + 96px)))
+    );
+}
+
+#knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+    border-radius: 50%;
+    background: rgba(255, 250, 240, 0.35);
+}
+
+/* debug */
+
+#debug {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    min-width: 180px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(13, 11, 9, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font:
+        11px / 1.5 ui-monospace,
+        monospace;
+}
+
+#debug[hidden] {
+    display: none;
+}
+
+#debug .readout {
+    display: grid;
+    margin-bottom: 6px;
+}
+
+#debug .readout button {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    padding: 1px 4px;
+    margin: 0 -4px;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: copy;
+}
+
+#debug .readout button:hover {
+    background: rgba(246, 238, 221, 0.08);
+}
+
+#debug .readout button.copied {
+    background: rgba(160, 220, 150, 0.25);
+}
+
+#debug .readout span:first-child {
+    opacity: 0.55;
+}
+
+#debug label {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* title */
+
+#title {
+    position: fixed;
+    inset: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+    border: 1px solid rgba(246, 238, 221, 0.3);
+    font:
+        400 10px / 1 "Paper Mono",
+        ui-monospace,
+        monospace;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(246, 238, 221, 0.82);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.title #title {
+    opacity: 1;
+}
+
+#title .corner {
+    position: absolute;
+    padding: 14px 16px;
+}
+
+#title .top {
+    top: 0;
+}
+
+#title .left {
+    left: 0;
+}
+
+#title .right {
+    right: 0;
+}
+
+#title .enter {
+    position: absolute;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    animation: breathe 2.6s ease-in-out infinite;
+}
+
+#title .tap {
+    display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    #title .mouse {
+        display: none;
+    }
+
+    #title .tap {
+        display: inline;
+    }
+}
+
+/* hidden behind the title */
+
+.title #keys,
+.title #crosshair,
+.title #stick {
+    opacity: 0;
+}
+
+#keys,
+#crosshair {
+    transition: opacity 0.6s ease;
+}
