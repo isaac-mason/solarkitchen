@@ -8,7 +8,7 @@ import { type Physics, rayDistance } from './physics';
 const { abs, floor, mod, screenCoordinate, uniform } = TSL;
 
 const TITLE = {
-    text: 'the ketchen',
+    text: 'the kitchen',
     color: '#f6eedd',
     distance: 2.4,
     // Never closer than this share of the way to whatever's ahead.
