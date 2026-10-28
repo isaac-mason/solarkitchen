@@ -20,8 +20,8 @@ const BOB = { stride: 0.75, height: 0.022, seconds: 0.15, landPerSpeed: 0.018, l
 // Shorter than this off the ground is the collider's bumps, not a fall worth landing from.
 const MIN_AIR_SECONDS = 0.15;
 
-const SPAWN: Vec3 = [-7.52, 0.07, -10.99];
-const SPAWN_LOOK = { yaw: 2.234, pitch: -0.2 };
+const SPAWN: Vec3 = [-7.88, 0.04, -11.64];
+const SPAWN_LOOK = { yaw: 1.93, pitch: -0.266 };
 
 export type Player = {
     controller: KCC;
