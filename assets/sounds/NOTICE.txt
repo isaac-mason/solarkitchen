@@ -1,0 +1,6 @@
+The .ogg files here (footsteps and cooking/) come from the Minetest Game "default" mod, by way of makecat:
+https://github.com/minetest/minetest_game/tree/master/mods/default/sounds
+
+They're licensed CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
+Attribution: "Minetest Game contributors"; see
+https://github.com/minetest/minetest_game/blob/master/mods/default/license.txt

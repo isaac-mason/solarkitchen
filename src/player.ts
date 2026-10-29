@@ -22,6 +22,10 @@ const MIN_AIR_SECONDS = 0.15;
 
 const SPAWN: Vec3 = [-7.88, 0.04, -11.64];
 const SPAWN_LOOK = { yaw: 1.93, pitch: -0.266 };
+// ?view=x,y,z,yaw,pitch starts somewhere else: feet, then look, for working on a corner of the room.
+const VIEW = new URLSearchParams(location.search).get('view')?.split(',').map(Number);
+const START: Vec3 = VIEW?.length === 5 ? [VIEW[0], VIEW[1], VIEW[2]] : SPAWN;
+const START_LOOK = VIEW?.length === 5 ? { yaw: VIEW[3], pitch: VIEW[4] } : SPAWN_LOOK;
 
 export type Player = {
     controller: KCC;
@@ -58,7 +62,7 @@ export function initPlayer(physics: Physics): Player {
             supportingVolumePlane: vec4.fromValues(0, 1, 0, -PLAYER.radius),
             backFaceMode: kcc.BackFaceMode.COLLIDE,
         },
-        SPAWN,
+        START,
         quat.create(),
     );
     kcc.add(physics.world, controller);
@@ -73,10 +77,10 @@ export function initPlayer(physics: Physics): Player {
         crouched: false,
         eye: PLAYER.eye,
         fov: ZOOM.fov,
-        yaw: SPAWN_LOOK.yaw,
-        pitch: SPAWN_LOOK.pitch,
-        aimYaw: SPAWN_LOOK.yaw,
-        aimPitch: SPAWN_LOOK.pitch,
+        yaw: START_LOOK.yaw,
+        pitch: START_LOOK.pitch,
+        aimYaw: START_LOOK.yaw,
+        aimPitch: START_LOOK.pitch,
         smoothLook: false,
         stride: 0,
         stepped: false,
