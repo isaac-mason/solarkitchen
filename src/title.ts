@@ -22,6 +22,8 @@ const TITLE = {
 };
 const SWAY = { yaw: 0.008, pitch: 0.004, speed: 0.12 };
 const EXIT_SECONDS = 0.7;
+// Metres you walk from where you entered before the title dissolves: it stays up while you look round.
+const WALK_AWAY = 1;
 // Screen pixels per dither cell: chunky enough to read as a dissolve, not a fade.
 const DITHER_PIXELS = 2;
 
@@ -37,6 +39,8 @@ export type Title = {
     dissolve: ReturnType<typeof uniform>;
     entered: boolean;
     exit: number;
+    // The sway's settling once you enter, 0 → 1.
+    settle: number;
     time: number;
 };
 
@@ -75,6 +79,7 @@ export async function initTitle(scene: THREE.Scene, camera: THREE.Camera, physic
         dissolve,
         entered: false,
         exit: 0,
+        settle: 0,
         time: 0,
     };
 }
@@ -126,7 +131,9 @@ export function updateTitle(title: Title, entering: boolean, camera: THREE.Persp
         title.entered = true;
         document.body.classList.remove('title');
     }
-    if (title.entered && title.exit < 1) {
+    if (title.entered) title.settle = Math.min(1, title.settle + dt / EXIT_SECONDS);
+    const walked = Math.hypot(camera.position.x - title.origin.x, camera.position.z - title.origin.z);
+    if (title.exit > 0 || (title.entered && walked > WALK_AWAY)) {
         title.exit = Math.min(1, title.exit + dt / EXIT_SECONDS);
         const eased = title.exit * title.exit * (3 - 2 * title.exit);
         title.dissolve.value = eased;
@@ -135,8 +142,8 @@ export function updateTitle(title: Title, entering: boolean, camera: THREE.Persp
 
     if (title.group.visible) fitTitle(title, camera);
 
-    // A slow sway while the title is up, gone as you enter.
-    const sway = 1 - title.exit;
+    // A slow sway before you enter, settling as you do.
+    const sway = 1 - title.settle;
     if (sway <= 0) return;
     const t = title.time * SWAY.speed * Math.PI * 2;
     camera.rotation.y += Math.sin(t) * SWAY.yaw * sway;

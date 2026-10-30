@@ -4,14 +4,14 @@ import sceneUrl from '../assets/scene.spz?url';
 import colliderUrl from '../assets/scene-collider.glb?url';
 import { initCooking, unlockCooking, updateCooking } from './cooking';
 import { initDebug, updateDebug } from './debug';
-import { initDust, updateDust } from './dust';
-import { initFocus, updateFocus } from './focus';
 import { initFootsteps, unlockFootsteps, updateFootsteps } from './footsteps';
 import { initInput, updateInput } from './input';
 import { finishLoader, initLoader, setLoaderProgress, setLoaderStage } from './loader';
+import { initMeadow, updateMeadow } from './meadow';
 import { initPhysics, loadCollider, updatePhysics } from './physics';
 import { applyPlayerCamera, initPlayer, updatePlayer, zoomAmount } from './player';
 import { initTitle, renderTitle, updateTitle } from './title';
+import { cutWindow, frameSplats, glassSplats } from './window';
 import './style.css';
 
 const MAX_DT = 1 / 30;
@@ -32,19 +32,32 @@ async function init() {
         loadSplats(sceneUrl, { onProgress: (fraction, stage) => setLoaderStage(loader, fraction, stage) }),
         loadCollider(physics, colliderUrl),
     ]);
-    const world = SplatCollection.arrays(GpuArrays.fromData(renderer, data));
-    const dust = initDust();
-    console.log(`homestead: ${dust.count.toLocaleString()} dust motes`);
+    const world = cutWindow(GpuArrays.fromData(renderer, data));
+    const meadow = initMeadow(scene, renderer);
 
     const cooking = initCooking();
-    const splats = new SplatRenderer({ renderer, collection: new SplatCollection([world, dust.object, ...cooking.objects]) });
+    const parts = {
+        room: world,
+        cooking: cooking.objects,
+        ground: meadow.parts.ground,
+        grass: meadow.parts.grass,
+        flowers: meadow.parts.flowers,
+        butterflies: meadow.parts.butterflies,
+
+        clouds: meadow.parts.clouds,
+        glass: glassSplats(meadow.eye),
+        frames: frameSplats(renderer, data),
+    };
+    const splats = new SplatRenderer({
+        renderer,
+        collection: new SplatCollection(Object.values(parts).flat()),
+    });
     splats.raycast = () => {};
     scene.add(splats);
 
     const player = initPlayer(physics);
-    const focus = initFocus(splats);
     const footsteps = initFootsteps();
-    const debug = initDebug(scene, physics, player);
+    const debug = initDebug(scene, physics, player, parts);
     const vignette = document.getElementById('vignette') as HTMLDivElement;
     const input = initInput(renderer.domElement, () => {
         unlockFootsteps(footsteps);
@@ -65,11 +78,10 @@ async function init() {
         camera,
         renderer,
         splats,
-        dust,
         cooking,
+        meadow,
         physics,
         player,
-        focus,
         footsteps,
         input,
         debug,
@@ -88,16 +100,15 @@ function update(state: State, dt: number) {
     updateFootsteps(state.footsteps, state.player.stepped, state.player.landed);
     applyPlayerCamera(state.player, state.camera);
     updateTitle(state.title, state.input.active, state.camera, dt);
-    updateFocus(state.focus, state.physics, state.camera, state.splats, dt, !state.title.entered);
-    updateDust(state.dust, state.camera, dt);
     updateCooking(state.cooking, state.input.keys, state.camera, dt);
+    updateMeadow(state.meadow, state.camera, dt);
 
-    // the WebGL2 backend's CPU sort only runs when asked, and the dust never stops
+    // the WebGL2 backend's CPU sort only runs when asked, and the grass and steam never stop
     if (state.splats.sortMode === 'cpu') state.splats.requestSort();
 
     document.body.classList.toggle('active', state.input.active);
     state.vignette.style.opacity = zoomAmount(state.player).toFixed(3);
-    updateDebug(state.debug, state.player, state.focus, state.splats, dt);
+    updateDebug(state.debug, state.player, state.splats, dt);
     renderTitle();
     state.renderer.render(state.scene, state.camera);
 }

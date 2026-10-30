@@ -1,6 +1,5 @@
-import type { SplatRenderer } from 'spark-radix';
+import type { AnySplatObject, SplatRenderer } from 'spark-radix';
 import * as THREE from 'three';
-import type { Focus } from './focus';
 import type { Physics } from './physics';
 import type { Player } from './player';
 
@@ -12,7 +11,9 @@ export type Debug = {
     sinceRefresh: number;
 };
 
-export function initDebug(scene: THREE.Scene, physics: Physics, player: Player): Debug {
+type Parts = Record<string, AnySplatObject | AnySplatObject[]>;
+
+export function initDebug(scene: THREE.Scene, physics: Physics, player: Player, parts: Parts): Debug {
     const panel = document.createElement('div');
     panel.id = 'debug';
     panel.hidden = true;
@@ -21,7 +22,7 @@ export function initDebug(scene: THREE.Scene, physics: Physics, player: Player):
     const debug: Debug = { panel, rows: new Map(), collider: null, frameMs: 16, sinceRefresh: 0 };
     const readout = document.createElement('div');
     readout.className = 'readout';
-    for (const name of ['fps', 'feet', 'eye', 'look', 'ground', 'focus', 'fov', 'splats', 'collider']) {
+    for (const name of ['fps', 'feet', 'eye', 'look', 'ground', 'fov', 'splats', 'collider']) {
         const row = document.createElement('button');
         row.type = 'button';
         row.title = 'click to copy';
@@ -39,6 +40,21 @@ export function initDebug(scene: THREE.Scene, physics: Physics, player: Player):
         });
     }
     panel.append(readout);
+    // What the splats are made of, each part's count: fixed, so worked out once.
+    const counts = document.createElement('div');
+    counts.className = 'readout';
+    for (const [name, part] of Object.entries(parts)) {
+        const count = [part].flat().reduce((sum, object) => sum + object.count, 0);
+        const row = document.createElement('button');
+        row.type = 'button';
+        const key = document.createElement('span');
+        key.textContent = `  ${name}`;
+        const value = document.createElement('span');
+        value.textContent = count.toLocaleString();
+        row.append(key, value);
+        counts.append(row);
+    }
+    panel.append(counts);
     window.addEventListener('keydown', (event) => {
         if (event.code === 'Backquote') panel.hidden = !panel.hidden;
     });
@@ -47,6 +63,9 @@ export function initDebug(scene: THREE.Scene, physics: Physics, player: Player):
     addToggle(debug, 'smooth look', player.smoothLook, (on) => {
         player.smoothLook = on;
         remember('smoothLook', on);
+    });
+    addToggle(debug, 'noclip (space up, C down)', false, (on) => {
+        player.noclip = on;
     });
     return debug;
 }
@@ -100,7 +119,7 @@ function addColliderToggle(debug: Debug, scene: THREE.Scene, collider: NonNullab
     });
 }
 
-export function updateDebug(debug: Debug, player: Player, focus: Focus, splats: SplatRenderer, dt: number): void {
+export function updateDebug(debug: Debug, player: Player, splats: SplatRenderer, dt: number): void {
     debug.frameMs += (dt * 1000 - debug.frameMs) * 0.05;
     debug.sinceRefresh += dt;
     if (debug.panel.hidden || debug.sinceRefresh < 0.2) return;
@@ -120,7 +139,6 @@ export function updateDebug(debug: Debug, player: Player, focus: Focus, splats: 
         `{ yaw: ${player.yaw.toFixed(3)}, pitch: ${player.pitch.toFixed(3)} }`,
     );
     show(debug, 'ground', `${player.grounded ? 'yes' : 'no'}${player.crouched ? ', crouched' : ''}`);
-    show(debug, 'focus', `${focus.distance.toFixed(2)} m`);
     show(debug, 'fov', `${player.fov.toFixed(0)}°`);
     show(debug, 'splats', splats.collection.count.toLocaleString());
     show(debug, 'collider', `${triangles.toLocaleString()} tris`);

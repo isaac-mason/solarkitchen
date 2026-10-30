@@ -28,6 +28,8 @@ const START: Vec3 = VIEW?.length === 5 ? [VIEW[0], VIEW[1], VIEW[2]] : SPAWN;
 const START_LOOK = VIEW?.length === 5 ? { yaw: VIEW[3], pitch: VIEW[4] } : SPAWN_LOOK;
 
 export type Player = {
+    // Flying free through walls, for looking round: space up, C down, shift faster.
+    noclip: boolean;
     controller: KCC;
     settings: kcc.UpdateSettings;
     filter: Filter;
@@ -75,6 +77,7 @@ export function initPlayer(physics: Physics): Player {
         standing,
         crouching,
         crouched: false,
+        noclip: false,
         eye: PLAYER.eye,
         fov: ZOOM.fov,
         yaw: START_LOOK.yaw,
@@ -111,6 +114,10 @@ export function updatePlayer(player: Player, physics: Physics, input: Input, dt:
     const [strafe, forward] = input.move;
     const sin = Math.sin(player.yaw);
     const cos = Math.cos(player.yaw);
+    if (player.noclip) {
+        fly(player, strafe, forward, input, dt);
+        return;
+    }
     vec3.set(wish, strafe * cos - forward * sin, 0, -strafe * sin - forward * cos);
     const { controller } = player;
     const wantsCrouch = input.crouch;
@@ -146,6 +153,21 @@ export function updatePlayer(player: Player, physics: Physics, input: Input, dt:
     kcc.update(physics.world, controller, dt, GRAVITY, player.settings, undefined, player.filter);
     const moved = Math.hypot(controller.position[0] - before[0], controller.position[2] - before[2]);
     updateStride(player, moved, fallSpeed, dt);
+}
+
+const NOCLIP = { speed: 3, fast: 9 };
+
+function fly(player: Player, strafe: number, forward: number, input: Input, dt: number) {
+    const { position, linearVelocity } = player.controller;
+    const speed = (input.run ? NOCLIP.fast : NOCLIP.speed) * dt;
+    const level = Math.cos(player.pitch);
+    const ahead = [-Math.sin(player.yaw) * level, Math.sin(player.pitch), -Math.cos(player.yaw) * level];
+    const right = [Math.cos(player.yaw), 0, -Math.sin(player.yaw)];
+    const up = (input.jump ? 1 : 0) - (input.crouch ? 1 : 0);
+    for (let k = 0; k < 3; k++) position[k] += (ahead[k] * forward + right[k] * strafe + (k === 1 ? up : 0)) * speed;
+    vec3.zero(linearVelocity);
+    player.stepped = false;
+    player.landed = false;
 }
 
 function updateStride(player: Player, moved: number, fallSpeed: number, dt: number) {
