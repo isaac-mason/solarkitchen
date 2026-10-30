@@ -1,4 +1,4 @@
-# spacekitchen
+# solarkitchen
 
 Walk around a Gaussian-splat space kitchen.
 
