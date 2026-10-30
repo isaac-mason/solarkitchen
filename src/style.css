@@ -71,6 +71,35 @@ canvas {
     opacity: 0;
 }
 
+/* what you can do with what you're looking at, beside the crosshair */
+
+#prompt {
+    position: fixed;
+    top: 50%;
+    left: calc(50% + 22px);
+    transform: translateY(-50%);
+    display: grid;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+#prompt.shown {
+    opacity: 0.9;
+}
+
+#prompt > div {
+    display: flex;
+    align-items: center;
+}
+
+#prompt span {
+    margin-left: 8px;
+    font-size: 13px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
 /* keyboard */
 
 #keys {
@@ -90,7 +119,8 @@ canvas {
     gap: 3px;
 }
 
-#keys kbd {
+#keys kbd,
+#prompt kbd {
     display: inline-grid;
     place-items: center;
     min-width: 20px;
@@ -303,6 +333,7 @@ canvas {
 
 .title #keys,
 .title #crosshair,
+.title #prompt,
 .title #stick {
     opacity: 0;
 }
