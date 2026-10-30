@@ -1,6 +1,6 @@
 import { glyph, slug } from '@pmndrs/glyph';
 import { defineTextMaterial, type Text, ThreeConfig } from '@pmndrs/glyph/three';
-import { TSL } from 'spark-radix';
+import { TSL } from '@sparkjsdev/radix';
 import * as THREE from 'three';
 import fontUrl from '../assets/fonts/paper-mono-light.font.glb?url';
 import { type Physics, rayDistance } from './physics';

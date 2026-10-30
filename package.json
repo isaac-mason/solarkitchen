@@ -23,7 +23,7 @@
         "@pmndrs/glyph": "0.1.0",
         "crashcat": "^0.0.5",
         "mathcat": "0.0.13",
-        "spark-radix": "github:asundqui/radix-test#22cdb1702f66231b3cc6440f35154ec9a81242f3",
+        "@sparkjsdev/radix": "^0.0.1",
         "three": "^0.186.0"
     },
     "devDependencies": {
@@ -36,7 +36,6 @@
     },
     "pnpm": {
         "onlyBuiltDependencies": [
-            "spark-radix",
             "esbuild"
         ],
         "overrides": {

@@ -1,4 +1,4 @@
-import type { AnySplatObject, SplatRenderer } from 'spark-radix';
+import type { AnySplatObject, SplatRenderer } from '@sparkjsdev/radix';
 import * as THREE from 'three';
 import type { Physics } from './physics';
 import type { Player } from './player';

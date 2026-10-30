@@ -1,4 +1,4 @@
-import type { ProgressStage } from 'spark-radix';
+import type { ProgressStage } from '@sparkjsdev/radix';
 
 // Share of the bar each stage fills; the rest is the shader compile.
 const STAGES: Partial<Record<ProgressStage, [number, number]>> = {
